@@ -46,7 +46,7 @@ public enum SelectedBarVerticalAlignment {
 open class ButtonBarView: UICollectionView {
 
     open lazy var selectedBar: UIView = { [unowned self] in
-        let bar  = UIView(frame: CGRect(x: 0, y: self.frame.size.height - CGFloat(self.selectedBarHeight), width: 0, height: CGFloat(self.selectedBarHeight)))
+        let bar  = UIView(frame: CGRect(x: 0, y: self.frame.size.height - CGFloat(self.selectedBarHeight), width: self.selectedBarWidth ?? 0, height: CGFloat(self.selectedBarHeight)))
         bar.layer.zPosition = 9999
         return bar
     }()
@@ -56,6 +56,7 @@ open class ButtonBarView: UICollectionView {
             updateSelectedBarYPosition()
         }
     }
+    var selectedBarWidth: CGFloat? = nil
     var selectedBarVerticalAlignment: SelectedBarVerticalAlignment = .bottom
     var selectedBarAlignment: SelectedBarAlignment = .center
     var selectedIndex = 0
@@ -99,8 +100,12 @@ open class ButtonBarView: UICollectionView {
         targetFrame.size.height = selectedBar.frame.size.height
         targetFrame.size.width += (toFrame.size.width - fromFrame.size.width) * progressPercentage
         targetFrame.origin.x += (toFrame.origin.x - fromFrame.origin.x) * progressPercentage
+        
+        let width = selectedBarWidth ?? targetFrame.size.width
+        let offsetX = targetFrame.origin.x + (targetFrame.size.width - width) / 2
 
-        selectedBar.frame = CGRect(x: targetFrame.origin.x, y: selectedBar.frame.origin.y, width: targetFrame.size.width, height: selectedBar.frame.size.height)
+        selectedBar.frame = CGRect(x: offsetX, y: selectedBar.frame.origin.y,
+                                   width: width, height: selectedBar.frame.size.height)
 
         var targetContentOffset: CGFloat = 0.0
         if contentSize.width > frame.size.width {
@@ -120,10 +125,10 @@ open class ButtonBarView: UICollectionView {
         let attributes = layoutAttributesForItem(at: selectedCellIndexPath)
         let selectedCellFrame = attributes!.frame
 
-        updateContentOffset(animated: animated, pagerScroll: pagerScroll, toFrame: selectedCellFrame, toIndex: (selectedCellIndexPath as NSIndexPath).row)
-
-        selectedBarFrame.size.width = selectedCellFrame.size.width
-        selectedBarFrame.origin.x = selectedCellFrame.origin.x
+        updateContentOffset(animated: animated, pagerScroll: pagerScroll, toFrame: selectedCellFrame, toIndex: (selectedCellIndexPath as NSIndexPath).item)
+        
+        selectedBarFrame.size.width = selectedBarWidth ?? selectedCellFrame.size.width
+        selectedBarFrame.origin.x = selectedCellFrame.origin.x + (selectedCellFrame.size.width - selectedBarFrame.size.width) / 2
 
         if animated {
             UIView.animate(withDuration: 0.3, animations: { [weak self] in
