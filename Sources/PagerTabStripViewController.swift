@@ -119,7 +119,8 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
 
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        lastSize = containerView.bounds.size
+        //190202: by cddjr
+        //lastSize = containerView.bounds.size
         updateIfNeeded()
         let needToUpdateCurrentChild = preCurrentIndex != currentIndex
         if needToUpdateCurrentChild {
@@ -199,7 +200,9 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
     }
 
     open func offsetForChild(at index: Int) -> CGFloat {
-        return (CGFloat(index) * containerView.bounds.width) + ((containerView.bounds.width - view.bounds.width) * 0.5)
+        //190202: by cddjr
+        //return (CGFloat(index) * containerView.bounds.width) + ((containerView.bounds.width - view.bounds.width) * 0.5)
+        return pageOffsetForChild(at: index)
     }
 
     open func offsetForChild(viewController: UIViewController) throws -> CGFloat {
@@ -242,12 +245,12 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
             let pageOffsetForChild = self.pageOffsetForChild(at: index)
             if abs(containerView.contentOffset.x - pageOffsetForChild) < containerView.bounds.width {
                 if childController.parent != nil {
-                    childController.view.frame = CGRect(x: offsetForChild(at: index), y: 0, width: view.bounds.width, height: containerView.bounds.height)
+                    childController.view.frame = CGRect(x: pageOffsetForChild, y: 0, width: pageWidth, height: containerView.bounds.height)
                     childController.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
                 } else {
                     childController.beginAppearanceTransition(true, animated: false)
                     addChild(childController)
-                    childController.view.frame = CGRect(x: offsetForChild(at: index), y: 0, width: view.bounds.width, height: containerView.bounds.height)
+                    childController.view.frame = CGRect(x: pageOffsetForChild, y: 0, width: pageWidth, height: containerView.bounds.height)
                     childController.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
                     containerView.addSubview(childController.view)
                     childController.didMove(toParent: self)
